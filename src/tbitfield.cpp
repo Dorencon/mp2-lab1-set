@@ -13,10 +13,14 @@ TBitField::TBitField(int len)
 {
 	BitLen = len;
 	MemLen = BitLen / (sizeof(TELEM) * 8);
-	pMem = new TELEM[MemLen](0);
+	pMem = new TELEM[MemLen];
+	for (size_t i = 0; i < MemLen; i++)
+	{
+		pMem[i] = 0;
+	}
 }
 
-TBitField::TBitField(const TBitField &bf) : TBitField(bf.len)// конструктор копирования
+TBitField::TBitField(const TBitField &bf) : TBitField(bf.BitLen)// конструктор копирования
 {
 	for (size_t i = 0; i < MemLen; i++)
 	{
@@ -97,7 +101,7 @@ int TBitField::operator==(const TBitField &bf) const // сравнение
   }
   for (size_t i = 0; i < MemLen; i++)
   {
-	  if (pMem[i] != bf.pMem)
+	  if (pMem[i] != bf.pMem[i])
 	  {
 		  return 0;
 	  }
@@ -113,12 +117,12 @@ int TBitField::operator!=(const TBitField &bf) const // сравнение
   }
   for (size_t i = 0; i < MemLen; i++)
   {
-	  if (pMem[i] != bf.pMem)
+	  if (pMem[i] != bf.pMem[i])
 	  {
 		  return 1;
 	  }
   }
-  return 0
+  return 0;
 }
 
 TBitField TBitField::operator|(const TBitField &bf) // операция "или"
@@ -126,7 +130,7 @@ TBitField TBitField::operator|(const TBitField &bf) // операция "или"
 	TBitField c(max(BitLen, bf.BitLen));
 	for (size_t i = 0; i < MemLen; i++)
 	{
-		c[i] = pMem[i]|bf.pMem[i];
+		c.pMem[i] = pMem[i]|bf.pMem[i];
 	}
 	return c;
 }
@@ -176,7 +180,7 @@ istream &operator>>(istream &istr, TBitField &bf) // ввод
 
 ostream &operator<<(ostream &ostr, const TBitField &bf) // вывод
 {
-	for (size_t i = 0; i < BitLen; i++)
+	for (size_t i = 0; i < bf.BitLen; i++)
 	{
 		ostr << bf.GetBit(i);
 	}
