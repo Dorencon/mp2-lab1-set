@@ -8,9 +8,14 @@
 #include "tbitfield.h"
 
 #include <algorithm>
+#include <stdexcept>
 
 TBitField::TBitField(int len)
 {
+	if (len < 0)
+	{
+		throw runtime_error("");
+	}
 	BitLen = len;
 	MemLen = BitLen / (sizeof(TELEM) * 8);
 	pMem = new TELEM[MemLen];
@@ -57,6 +62,10 @@ int TBitField::GetLength(void) const // получить длину (к-во б�
 
 void TBitField::SetBit(const int n) // установить бит
 {
+	if ((n < 0) || (n > BitLen))
+	{
+		throw runtime_error("");
+	}
 	int t1 = GetMemIndex(n);
 	int t2 = GetMemMask(n);
 	pMem[t1] = pMem[t1] | t2;
@@ -64,6 +73,10 @@ void TBitField::SetBit(const int n) // установить бит
 
 void TBitField::ClrBit(const int n) // очистить бит
 {
+	if ((n < 0) || (n > BitLen))
+	{
+		throw runtime_error("");
+	}
 	int t1 = GetMemIndex(n);
 	int t2 = ~GetMemMask(n);
 	pMem[t1] = pMem[t1] & t2;
@@ -71,9 +84,13 @@ void TBitField::ClrBit(const int n) // очистить бит
 
 int TBitField::GetBit(const int n) const // получить значение бита
 {
-  int t1 = GetMemIndex(n);
-  int t2 = GetMemMask(n);
-  return int(pMem[t1] & t2);
+	if ((n < 0) || (n > BitLen))
+	{
+		throw runtime_error("");
+	}
+	int t1 = GetMemIndex(n);
+	int t2 = GetMemMask(n);
+	return int(pMem[t1] & t2);
 }
 
 // битовые операции
@@ -128,9 +145,23 @@ int TBitField::operator!=(const TBitField &bf) const // сравнение
 TBitField TBitField::operator|(const TBitField &bf) // операция "или"
 {
 	TBitField c(max(BitLen, bf.BitLen));
-	for (size_t i = 0; i < MemLen; i++)
+	for (size_t i = 0; i < min(MemLen, bf.MemLen); i++)
 	{
 		c.pMem[i] = pMem[i]|bf.pMem[i];
+	}
+	if (MemLen < bf.MemLen)
+	{
+		for (size_t i = MemLen; i < bf.MemLen; i++)
+		{
+			c.pMem[i] = bf.pMem[i];
+		}
+	}
+	else
+	{
+		for (size_t i = bf.MemLen; i < MemLen; i++)
+		{
+			c.pMem[i] = pMem[i];
+		}
 	}
 	return c;
 }
@@ -138,7 +169,7 @@ TBitField TBitField::operator|(const TBitField &bf) // операция "или"
 TBitField TBitField::operator&(const TBitField &bf) // операция "и"
 {
 	TBitField c(max(BitLen, bf.BitLen));
-	for (size_t i = 0; i < MemLen; i++)
+	for (size_t i = 0; i < min(MemLen, bf.MemLen); i++)
 	{
 		c.pMem[i] = pMem[i]&bf.pMem[i];
 	}

@@ -7,6 +7,8 @@
 
 #include "tset.h"
 
+#include <stdexcept>
+
 TSet::TSet(int mp) : BitField(mp), MaxPower(mp)
 {
 }
@@ -88,6 +90,10 @@ TSet TSet::operator+(const TSet &s) // объединение
 
 TSet TSet::operator+(const int Elem) // объединение с элементом
 {
+	if (Elem > MaxPower)
+	{
+		throw runtime_error("");
+	}
 	TSet c (BitField);
 	c.BitField.SetBit(Elem);
 	return c;
